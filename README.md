@@ -59,11 +59,15 @@ file. Here they are named apart, and the names are load-bearing:
   works as `Virtuademy.SDK.Library` inside `Virtuademy-SDK-Core`, which as of the step-5 refactor is
   already free of the system framework. Moving it here is a relocation and a rename, not new code,
   and it is bundled with the repo pass.
-- **Nothing implements `IPlatformContext` yet.** The field-level projection exists —
-  `PlatformContextProjection` in `Virtuademy-SDK-PlatformApi` maps the wire DTOs onto these types —
-  but the orchestration behind `Initialize`, the state machine and the participant diffing do not.
-  That half replaces a boot sequence that works today and needs a running session to develop
-  against.
+- **`PlatformContext` in `Virtuademy-SDK-RealtimeApi` implements these, and nothing calls it yet.**
+  It is complete — `Initialize`, the state machine, permission joining, participant diffing, shards
+  and save data — but the Worlds app keeps its own boot: `AppManager` is untouched. A boot sequence
+  that works is not worth trading for one that has never run. First real exercise will be an
+  external app, or a deliberate migration of `AppManager` onto it.
+- **The projection lives one package down**, in `Virtuademy-SDK-PlatformApi`
+  (`PlatformContextProjection`), because that is where the wire types are. The two packages merge
+  into `Virtuademy-SDK-Library` in the target set; until then the orchestration sits in the
+  realtime one, since it needs both and that direction is the one that is not circular.
 - **The projection reads DTOs, not the `CM*` client models**, even though these field lists were
   derived from those models. The models live in the Creator Kit package, which an external app
   developer does not install. The consequence is visible in the projection's signatures: the two
@@ -71,7 +75,12 @@ file. Here they are named apart, and the names are load-bearing:
 - **`SessionParticipant` carries no role.** The design sketch said it would, but no role exists
   anywhere in the client models or the DTOs, so there was nothing to project. Either the platform
   grows one or the member stays out; it was not invented here.
-- **`SessionShard` has no projection yet.** There is no shard DTO — shard state arrives over the
-  realtime channel, so it belongs with the orchestration rather than with the field mapping.
+- **Four fields were dropped because the wire cannot fill them**, and they are worth listing
+  together because they are one mistake made four times: the field lists were derived from the
+  `CM*` client models, which assemble their values from statics and from more than one fetch, so a
+  projection straight from the wire could never have filled them. Gone:
+  `PlatformExperience.WorldId`, `PlatformWorld.MaxOnlineUsers`, `SessionShard.MaxParticipants` (one
+  global for the whole deployment, read through a static field), and `SessionParticipant`'s role
+  (which exists nowhere at all).
 - **`EnableShard(bool)` is unresolved.** A mutation, but on one's own participation — the same
   category as save data, which is in. Left out until decided.
