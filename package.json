@@ -1,0 +1,11 @@
+{
+  "name": "com.anotherealitysrl.virtuademy-sdk-interface",
+  "displayName": "Virtuademy-SDK-Interface",
+  "version": "0.1.0",
+  "unity": "2020.1",
+  "description": "Platform-context contracts: the one point where the creator graph and the external-app graph meet. Interfaces and value types only — no transport, no credentials, no engine dependency.",
+  "keywords": [
+    "unity"
+  ],
+  "category": "Unity"
+}
