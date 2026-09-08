@@ -14,7 +14,7 @@ namespace Virtuademy.SDK.Interface
     /// it without showing anything. That is the point: whether the app was opened from the catalog
     /// or started on its own stays invisible to it.
     /// </remarks>
-    public delegate Task<WorldInfo> WorldChooser(IReadOnlyList<WorldInfo> available);
+    public delegate Task<PlatformWorld> WorldChooser(IReadOnlyList<PlatformWorld> available);
 
     /// <summary>
     /// Platform and session state, as an app sees it: who the user is, which world and session they
@@ -127,13 +127,13 @@ namespace Virtuademy.SDK.Interface
         /// The experience this app is running as — first-class, because it is the concept an
         /// external app *is* on the platform, not a detail of the session it happens to be in.
         /// </summary>
-        ExperienceInfo Experience { get; }
+        PlatformExperience Experience { get; }
 
         /// <summary>
         /// The world this session belongs to. Never null once <see cref="PlatformContextState.Ready"/>:
         /// without a world, initialization does not complete.
         /// </summary>
-        WorldInfo World { get; }
+        PlatformWorld World { get; }
 
         #endregion
 

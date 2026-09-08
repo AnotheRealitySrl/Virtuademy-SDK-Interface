@@ -8,21 +8,19 @@ namespace Virtuademy.SDK.Interface
     /// order to render a picker — a label, a description, a thumbnail address — and nothing that
     /// belongs to the catalog, such as the live occupancy counter or the world's default experience.
     /// </remarks>
-    public sealed class WorldInfo
+    public sealed class PlatformWorld
     {
-        public WorldInfo(int id,
-                         string label,
-                         string description,
-                         string thumbnailUri,
-                         bool multiplayer,
-                         int? maxOnlineUsers)
+        public PlatformWorld(int id,
+                             string label,
+                             string description,
+                             string thumbnailUri,
+                             bool multiplayer)
         {
             Id = id;
             Label = label;
             Description = description;
             ThumbnailUri = thumbnailUri;
             Multiplayer = multiplayer;
-            MaxOnlineUsers = maxOnlineUsers;
         }
 
         public int Id { get; }
@@ -38,8 +36,5 @@ namespace Virtuademy.SDK.Interface
         public string ThumbnailUri { get; }
 
         public bool Multiplayer { get; }
-
-        /// <summary>Null when the world sets no ceiling.</summary>
-        public int? MaxOnlineUsers { get; }
     }
 }

@@ -13,15 +13,18 @@ One assembly, `Virtuademy.SDK.Interface`, holding interfaces and their own value
 | `IPlatformContext` | Platform and session state as an app sees it — identity, session, experience, world, permissions, participants, shards, the caller's own save data |
 | `IPlatformAuthentication` | Sign-in. A sibling rather than a member, because `Initialize` presupposes an authenticated user |
 | `WorldChooser` | Delegate an app supplies to pick between worlds, consulted only when there is more than one |
-| `PlatformUser` · `PlatformSession` · `ExperienceInfo` · `WorldInfo` · `SessionParticipant` · `SessionShard` · `PlatformLaunchData` · `LoginChallenge` | Immutable projections. Constructor-set, get-only |
+| `PlatformUser` · `PlatformSession` · `PlatformExperience` · `PlatformWorld` · `SessionParticipant` · `SessionShard` · `PlatformLaunchData` · `LoginChallenge` | Immutable projections. Constructor-set, get-only |
 | `PlatformContextState` · `SessionStatus` · `ExperienceType` · `ParticipantPlatform` · `PlatformPermission` | The enums those carry |
 
 **The assembly definition declares no references and `noEngineReferences: true`.** That is not
 tidiness, it is the invariant: a mock must be able to implement these contracts with no network, no
 authentication and no platform — and with the asmdef empty, that property is enforced by the
 compiler rather than by anyone remembering it. It is also why no member returns a `Texture2D`, a
-`Color` or a `UnityEvent`: `WorldInfo` hands back a thumbnail *address*, and every notification is a
-plain `event Action`.
+`Color` or a `UnityEvent`: `PlatformWorld` hands back a thumbnail *address*, and every notification
+is a plain `event Action`.
+
+The `Platform*` prefix is uniform, and that is also what keeps these out of the way of the
+`*Info` family in `Virtuademy.SDK.PlatformApi` — which already contains a `WorldInfo`.
 
 ## Vocabulary
 
@@ -56,12 +59,19 @@ file. Here they are named apart, and the names are load-bearing:
   works as `Virtuademy.SDK.Library` inside `Virtuademy-SDK-Core`, which as of the step-5 refactor is
   already free of the system framework. Moving it here is a relocation and a rename, not new code,
   and it is bundled with the repo pass.
-- **Nothing implements `IPlatformContext` yet.** The adapter — the field-level projection from
-  `IClientModelSystem` onto these types — is the next step. Until it exists these contracts are
-  compiled and unused, which is deliberate: agreeing the surface before writing the projection is
-  the whole point of splitting them out.
+- **Nothing implements `IPlatformContext` yet.** The field-level projection exists —
+  `PlatformContextProjection` in `Virtuademy-SDK-PlatformApi` maps the wire DTOs onto these types —
+  but the orchestration behind `Initialize`, the state machine and the participant diffing do not.
+  That half replaces a boot sequence that works today and needs a running session to develop
+  against.
+- **The projection reads DTOs, not the `CM*` client models**, even though these field lists were
+  derived from those models. The models live in the Creator Kit package, which an external app
+  developer does not install. The consequence is visible in the projection's signatures: the two
+  `IsOwner` flags and both nickname reads need inputs a single DTO does not carry.
 - **`SessionParticipant` carries no role.** The design sketch said it would, but no role exists
-  anywhere in the client models it projects from, so there was nothing to project. Either the
-  platform grows one or the member stays out; it was not invented here.
+  anywhere in the client models or the DTOs, so there was nothing to project. Either the platform
+  grows one or the member stays out; it was not invented here.
+- **`SessionShard` has no projection yet.** There is no shard DTO — shard state arrives over the
+  realtime channel, so it belongs with the orchestration rather than with the field mapping.
 - **`EnableShard(bool)` is unresolved.** A mutation, but on one's own participation — the same
   category as save data, which is in. Left out until decided.

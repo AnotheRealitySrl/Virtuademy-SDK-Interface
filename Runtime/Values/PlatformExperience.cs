@@ -14,21 +14,19 @@ namespace Virtuademy.SDK.Interface
     /// identity to <see cref="IPlatformContext.Initialize"/>; it does not read the answer back.
     /// </para>
     /// </remarks>
-    public sealed class ExperienceInfo
+    public sealed class PlatformExperience
     {
-        public ExperienceInfo(int id,
-                              string title,
-                              string description,
-                              int worldId,
-                              ExperienceType type,
-                              bool isPublic,
-                              bool isOwner,
-                              DateTime lastUpdate)
+        public PlatformExperience(int id,
+                                  string title,
+                                  string description,
+                                  ExperienceType type,
+                                  bool isPublic,
+                                  bool isOwner,
+                                  DateTime lastUpdate)
         {
             Id = id;
             Title = title;
             Description = description;
-            WorldId = worldId;
             Type = type;
             IsPublic = isPublic;
             IsOwner = isOwner;
@@ -40,9 +38,6 @@ namespace Virtuademy.SDK.Interface
         public string Title { get; }
 
         public string Description { get; }
-
-        /// <summary>The world this experience belongs to.</summary>
-        public int WorldId { get; }
 
         public ExperienceType Type { get; }
 

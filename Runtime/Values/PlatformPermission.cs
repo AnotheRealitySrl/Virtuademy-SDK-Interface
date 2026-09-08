@@ -5,10 +5,17 @@ namespace Virtuademy.SDK.Interface
     /// <see cref="IPlatformContext.IsGranted"/>.
     /// </summary>
     /// <remarks>
-    /// <b>The numeric values are the platform's identifiers and are part of the wire contract.</b>
-    /// They are assigned explicitly and they are not contiguous — 4, 5, 6, 8, 9, 10, 11 and 13 do
-    /// not exist, having been retired server-side. Never renumber, never fill a gap, never reorder:
-    /// an adapter maps these by value.
+    /// <b>The member names are the wire contract.</b> The platform answers the permission endpoints
+    /// with a list of identifier <em>strings</em>, and an adapter matches them against these names
+    /// case-sensitively — so renaming a member here breaks it silently: the name stops matching, the
+    /// permission stops being granted, and it reads as a permissions bug rather than as a rename.
+    /// <para>
+    /// The numeric values mirror the platform's own facet ids, which is why they are assigned
+    /// explicitly and are not contiguous — 4, 5, 6, 8, 9, 10, 11 and 13 do not exist, having been
+    /// retired server-side. Nothing matches on them today; they are here so a value seen in a
+    /// database row or an API payload can be correlated with a member. Do not renumber them either,
+    /// for that reason.
+    /// </para>
     /// <para>
     /// Lifted here from a type nested inside a client model in the Worlds package. A permission is
     /// one of the few things an app genuinely has to reason about, and it cannot depend on that
