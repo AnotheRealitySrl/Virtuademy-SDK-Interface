@@ -45,11 +45,6 @@ namespace Virtuademy.SDK.Interface
         /// opens the realtime connection, joins or creates the session, loads permissions and the
         /// caller's saved data.
         /// </summary>
-        /// <param name="appScheme">
-        /// The app's own identity — a compile-time constant it always knows. The platform matches it
-        /// against the experiences registered for this app to find the worlds the app may enter, and
-        /// the match happens server-side: the app never receives a world list it is not entitled to.
-        /// </param>
         /// <param name="chooseWorld">
         /// Consulted only when more than one world is available. Null means "fail instead of
         /// asking", which is the right choice for an app that expects exactly one.
@@ -60,13 +55,21 @@ namespace Virtuademy.SDK.Interface
         /// session is created with an owner — so an app doing its own login authenticates first,
         /// through <see cref="IPlatformAuthentication"/>.
         /// <para>
-        /// Failure here is often not exceptional: no world is registered for this app, the user
-        /// cannot access the world named in the launch data, or no world was chosen. Those end in
-        /// <see cref="PlatformContextState.Failed"/> with a <see cref="FailureReason"/>, not in a
-        /// thrown exception.
+        /// <b>The app does not pass its own identity, and that is settled rather than pending.</b>
+        /// An earlier draft took an app scheme here. The platform reads the app from its token's
+        /// <c>azp</c> claim instead and matches it server-side against the identity recorded on each
+        /// published experience — so there is no second copy of an app identity to keep in sync, and
+        /// an app cannot ask about a different app. A parameter would have been a value the server
+        /// ignores, which is worse than no parameter: it looks load-bearing.
+        /// </para>
+        /// <para>
+        /// Failure here is often not exceptional: this app is published in no world this user can
+        /// enter, the user cannot access the world named in the launch data, or no world was chosen.
+        /// Those end in <see cref="PlatformContextState.Failed"/> with a
+        /// <see cref="FailureReason"/>, not in a thrown exception.
         /// </para>
         /// </remarks>
-        Task Initialize(string appScheme, WorldChooser chooseWorld = null);
+        Task Initialize(WorldChooser chooseWorld = null);
 
         /// <summary>
         /// How far initialization got, and whether the context is usable.
