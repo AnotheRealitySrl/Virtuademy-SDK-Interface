@@ -40,7 +40,15 @@ namespace Virtuademy.SDK.Interface
         ManageMySessions = 21,
         ManageMyAuthoredExperiences = 22,
         ShowCatalogTab = 23,
-        ShowLeaderboard = 24,
+
+        /// <summary>
+        /// Plural, because the platform's identifier is. The member was <c>ShowLeaderboard</c> and
+        /// therefore never matched: the seed row is <c>N'ShowLeaderboards'</c> and the live server
+        /// sends that, so this one permission was silently dropped by every client that has ever
+        /// parsed the list. It is the whole reason the names are the wire contract and not the
+        /// numbers.
+        /// </summary>
+        ShowLeaderboards = 24,
         UseEmotes = 25,
         ShowLogo = 26,
         ShowTutorialButton = 27,
