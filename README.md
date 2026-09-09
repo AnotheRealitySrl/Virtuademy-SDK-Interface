@@ -6,34 +6,66 @@ graph meet: a creator installs `SPACS-*` + this + `Environments`, an external ap
 
 ## What is here today
 
-One assembly, `Virtuademy.SDK.Interface`, holding interfaces and their own value types:
+One assembly, `Virtuademy.SDK.Interface`:
 
 | Type | Role |
 |---|---|
 | `IPlatformContext` | Platform and session state as an app sees it — identity, session, experience, world, permissions, participants, shards, the caller's own save data |
 | `IPlatformAuthentication` | Sign-in. A sibling rather than a member, because `Initialize` presupposes an authenticated user |
-| `WorldChooser` | Delegate an app supplies to pick between worlds, consulted only when there is more than one |
-| `PlatformUser` · `PlatformSession` · `PlatformExperience` · `PlatformWorld` · `SessionParticipant` · `SessionShard` · `PlatformLaunchData` · `LoginChallenge` | Immutable projections. Constructor-set, get-only |
-| `PlatformContextState` · `SessionStatus` · `ExperienceType` · `ParticipantPlatform` · `PlatformPermission` | The enums those carry |
+| `WorldChooser` | Delegate an app supplies to pick between publications, consulted only when there is more than one |
+| `PlatformContextState` · `PlatformPermission` · `PlatformLaunchData` · `LoginChallenge` · `SessionShard` | The five types this contract still declares itself — see below |
 
-**The assembly definition declares no references and `noEngineReferences: true`.** That is not
-tidiness, it is the invariant: a mock must be able to implement these contracts with no network, no
-authentication and no platform — and with the asmdef empty, that property is enforced by the
-compiler rather than by anyone remembering it. It is also why no member returns a `Texture2D`, a
-`Color` or a `UnityEvent`: `PlatformWorld` hands back a thumbnail *address*, and every notification
-is a plain `event Action`.
+`IPlatformContext` hands back the platform's **own wire types** — `UserDTO`, `SessionDTO`,
+`WorldDTO`, `ExperienceDTO`, `OnlineUserDTO`, and the placements a chooser picks from. It does not
+mirror them.
 
-The `Platform*` prefix is uniform, and that is also what keeps these out of the way of the
-`*Info` family in `Virtuademy.SDK.PlatformApi` — which already contains a `WorldInfo`.
+## Why it names the DTOs, and why it used to mirror them
+
+An earlier version of this package declared a parallel set of value types — `PlatformUser`,
+`PlatformSession` and six more — with a projection mapping each DTO onto its twin. The argument was
+the perimeter: naming `SessionDTO` would make this assembly reference the one holding the platform
+client, and a creator installing these contracts would get the client along with them.
+
+That argument held only because the DTOs and the client shared an assembly, which was an accident of
+layout rather than a necessity. **They no longer do.** The DTOs are `Virtuademy.SDK.PlatformApi.Wire`
+— data and nothing else — while the transport, the credential and the sixty endpoints stay in
+`Virtuademy.SDK.PlatformApi`, which nothing here names. The perimeter the plan calls invariant 4a,
+*no transport and no credential in the contracts*, holds with no mirrored type at all.
+
+The mirror's cost was paid before it came out: four members had to be dropped for having no wire
+source, two types had to be renamed for colliding with the DTO family they duplicated, and every
+field added to a DTO would have had to be added twice. What it bought that was worth keeping is
+immutability — so the five DTOs this contract returns are **read-only**, and the single place in the
+project that wrote to one was changed to stop.
+
+**One property was given up with it.** The assembly used to declare no references and
+`noEngineReferences: true`, which let the contracts be compiled outside Unity — a real check that
+caught mistakes twice. The DTOs carry `[SerializeField]`, so that is gone. Mockability survives
+(a mock still needs no network, no auth and no platform); the standalone compile is now done with a
+small stub harness around the adapter instead.
+
+## The five types this contract still declares
+
+Each one is here because there is nothing to name, not because a twin was preferred:
+
+- **`PlatformPermission`** — the wire form is a bare **string**. There is no DTO, and a caller
+  cannot be handed raw text and expected to compare it correctly. **Its member names are the wire
+  contract**: they are parsed case-sensitively, so renaming one silently stops granting that
+  permission. That is not hypothetical — the leaderboard member was singular where the platform's
+  identifier is plural, and that permission had never resolved in any client until it was measured.
+- **`SessionShard`** — its wire form lives in the realtime package beside the WebSocket client, so
+  naming it would pull transport into these contracts.
+- **`PlatformContextState`**, **`PlatformLaunchData`**, **`LoginChallenge`** — concepts of this
+  contract with no wire counterpart at all.
 
 ## Vocabulary
 
 Three unrelated things were called "session" in the interface these contracts replace, in the same
-file. Here they are named apart, and the names are load-bearing:
+file. Here they are named apart on the interface members, which is where the naming lives:
 
 | Concept | Type | Here |
 |---|---|---|
-| The session | `int` | `PlatformSession.Id` · `SessionParticipant.SessionId` |
+| The session | `int` | `Session.Id` |
 | The realtime connection | `string` | `IPlatformContext.ConnectionId` |
 | The authentication session | `string` | `PlatformLaunchData.AuthSessionHash` |
 
@@ -44,43 +76,22 @@ file. Here they are named apart, and the names are load-bearing:
   one. `IPlatformContext` must not become the container for everything.
 - **The users directory and other sessions' presence.** An app holding those can enumerate the
   tenant.
-- **The catalog**, and every CRUD region — sessions, worlds, experiences, assets, tags, leaderboard,
-  keys, schedule. Those stay in the Worlds project. The only writes here are the save-data members,
-  and they write the caller's own data.
-- **`SessionStatus.Expired` / `.Empty`.** They exist server-side and must never reach a client. An
-  adapter that meets one has found a leak and should report it, not widen the enum.
+- **The catalog**, and every CRUD region. The only writes here are the save-data members, and they
+  write the caller's own data.
+- **`ESessionStatus.Expired` / `.Empty` reaching a caller.** They exist on the wire and are
+  server-side bookkeeping. With the enum returned as-is there is no mapping step to filter them, so
+  the adapter checks explicitly and **refuses** such a session rather than relabelling it — which is
+  what the conversion it replaces did, reporting both as `Persistent`.
 
 ## Known issues / TODO
 
-- **`Virtuademy.SDK.Interface.Client` does not exist yet.** The plan puts a second assembly in this
-  package — the minimum a creator needs in order to *call* these contracts: transport, request
-  building including HMAC, the credential model, the endpoint asset, the publish endpoints, plus an
-  editor assembly with the tenant session and the config generator. That content currently lives and
-  works as `Virtuademy.SDK.Library` inside `Virtuademy-SDK-Core`, which as of the step-5 refactor is
-  already free of the system framework. Moving it here is a relocation and a rename, not new code,
-  and it is bundled with the repo pass.
 - **`PlatformContext` in `Virtuademy-SDK-RealtimeApi` implements these, and nothing calls it yet.**
   It is complete — `Initialize`, the state machine, permission joining, participant diffing, shards
-  and save data — but the Worlds app keeps its own boot: `AppManager` is untouched. A boot sequence
-  that works is not worth trading for one that has never run. First real exercise will be an
-  external app, or a deliberate migration of `AppManager` onto it.
-- **The projection lives one package down**, in `Virtuademy-SDK-PlatformApi`
-  (`PlatformContextProjection`), because that is where the wire types are. The two packages merge
-  into `Virtuademy-SDK-Library` in the target set; until then the orchestration sits in the
-  realtime one, since it needs both and that direction is the one that is not circular.
-- **The projection reads DTOs, not the `CM*` client models**, even though these field lists were
-  derived from those models. The models live in the Creator Kit package, which an external app
-  developer does not install. The consequence is visible in the projection's signatures: the two
-  `IsOwner` flags and both nickname reads need inputs a single DTO does not carry.
-- **`SessionParticipant` carries no role.** The design sketch said it would, but no role exists
-  anywhere in the client models or the DTOs, so there was nothing to project. Either the platform
-  grows one or the member stays out; it was not invented here.
-- **Four fields were dropped because the wire cannot fill them**, and they are worth listing
-  together because they are one mistake made four times: the field lists were derived from the
-  `CM*` client models, which assemble their values from statics and from more than one fetch, so a
-  projection straight from the wire could never have filled them. Gone:
-  `PlatformExperience.WorldId`, `PlatformWorld.MaxOnlineUsers`, `SessionShard.MaxParticipants` (one
-  global for the whole deployment, read through a static field), and `SessionParticipant`'s role
-  (which exists nowhere at all).
-- **`EnableShard(bool)` is unresolved.** A mutation, but on one's own participation — the same
-  category as save data, which is in. Left out until decided.
+  and save data — but the Worlds app keeps its own boot: `AppManager` is untouched. First real
+  exercise will be an external app, or a deliberate migration of `AppManager` onto it.
+- **`Initialize`'s standalone path needs `GET /external-app/worlds`**, which is implemented only on
+  a feature branch of the Application API. Verified working against a locally-run one; deployed
+  nowhere.
+- **`SessionParticipant` carried no role and no longer exists as a type.** The design sketch had
+  one; no role exists anywhere in the DTOs, so there was nothing to project and none was invented.
+  A caller now gets `OnlineUserDTO`, which is what the platform actually sends.

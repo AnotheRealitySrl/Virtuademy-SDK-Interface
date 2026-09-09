@@ -1,3 +1,5 @@
+using Virtuademy.SDK.PlatformApi;
+
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -14,7 +16,7 @@ namespace Virtuademy.SDK.Interface
     /// it without showing anything. That is the point: whether the app was opened from the catalog
     /// or started on its own stays invisible to it.
     /// </remarks>
-    public delegate Task<PlatformWorld> WorldChooser(IReadOnlyList<PlatformWorld> available);
+    public delegate Task<ExternalAppPlacementDTO> WorldChooser(IReadOnlyList<ExternalAppPlacementDTO> available);
 
     /// <summary>
     /// Platform and session state, as an app sees it: who the user is, which world and session they
@@ -34,6 +36,27 @@ namespace Virtuademy.SDK.Interface
     /// <para>
     /// Every operation here reads state, with one deliberate exception: the save-data members write,
     /// but only the caller's own data.
+    /// </para>
+    /// <para>
+    /// <b>It returns the platform's own wire types, and an earlier draft mirrored them.</b> There
+    /// was a parallel set of value types here — <c>PlatformUser</c>, <c>PlatformSession</c> and six
+    /// more — with a projection mapping each DTO onto its twin. The argument for it was the
+    /// perimeter: naming <c>SessionDTO</c> would make this assembly reference the one holding the
+    /// platform client, and a creator installing these contracts would get the client with them.
+    /// </para>
+    /// <para>
+    /// That argument was true only because the DTOs and the client shared an assembly, which was an
+    /// accident of layout. They no longer do: the DTOs are their own assembly, referenced here,
+    /// while the transport, the credential and the sixty endpoints stay behind in another that
+    /// nothing here names. The perimeter the plan calls invariant 4a — no transport and no
+    /// credential in the contracts — holds without a single mirrored type.
+    /// </para>
+    /// <para>
+    /// What the mirror cost was paid in full before it came out: four members had to be dropped for
+    /// having no wire source at all, two types had to be renamed for colliding with the DTO family
+    /// they duplicated, and every field added to a DTO would have had to be added twice. What it
+    /// bought that is worth naming is immutability — so the five DTOs this interface hands back are
+    /// now read-only, and the one place that wrote to one has been changed to stop.
     /// </para>
     /// </remarks>
     public interface IPlatformContext
@@ -108,10 +131,10 @@ namespace Virtuademy.SDK.Interface
         #region Identity, session, experience, world
 
         /// <summary>The signed-in user. Null before <see cref="PlatformContextState.Ready"/>.</summary>
-        PlatformUser LocalUser { get; }
+        UserDTO LocalUser { get; }
 
         /// <summary>The session this client is in.</summary>
-        PlatformSession Session { get; }
+        SessionDTO Session { get; }
 
         /// <summary>
         /// This client's realtime connection id, from the handshake.
@@ -130,13 +153,13 @@ namespace Virtuademy.SDK.Interface
         /// The experience this app is running as — first-class, because it is the concept an
         /// external app *is* on the platform, not a detail of the session it happens to be in.
         /// </summary>
-        PlatformExperience Experience { get; }
+        ExperienceDTO Experience { get; }
 
         /// <summary>
         /// The world this session belongs to. Never null once <see cref="PlatformContextState.Ready"/>:
         /// without a world, initialization does not complete.
         /// </summary>
-        PlatformWorld World { get; }
+        WorldDTO World { get; }
 
         #endregion
 
@@ -166,10 +189,10 @@ namespace Virtuademy.SDK.Interface
         #region Participants
 
         /// <summary>Everyone currently in this session, including the local user.</summary>
-        IReadOnlyList<SessionParticipant> Participants { get; }
+        IReadOnlyList<OnlineUserDTO> Participants { get; }
 
         /// <summary>One participant by platform user id.</summary>
-        bool TryGetParticipant(int userId, out SessionParticipant participant);
+        bool TryGetParticipant(int userId, out OnlineUserDTO participant);
 
         /// <summary>Raised when someone joins.</summary>
         /// <remarks>
@@ -177,10 +200,10 @@ namespace Virtuademy.SDK.Interface
         /// so join and leave are computed by the implementation. An app that wants to react to one
         /// person arriving should not have to compare two lists to find out who.
         /// </remarks>
-        event Action<SessionParticipant> ParticipantJoined;
+        event Action<OnlineUserDTO> ParticipantJoined;
 
         /// <summary>Raised when someone leaves. Also derived — see <see cref="ParticipantJoined"/>.</summary>
-        event Action<SessionParticipant> ParticipantLeft;
+        event Action<OnlineUserDTO> ParticipantLeft;
 
         /// <summary>Raised on any change to <see cref="Participants"/>.</summary>
         event Action ParticipantsChanged;
