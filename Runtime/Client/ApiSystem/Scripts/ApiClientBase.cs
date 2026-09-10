@@ -398,23 +398,21 @@ namespace Virtuademy.SDK.Core.ApiSystem
         /// second way to fail startup against a server already known to be reachable.
         /// </para>
         /// <para>
-        /// The bearer token is not among the values copied, on purpose. Both clients resolve
-        /// theirs through the same <see cref="ITokenProvider"/> under the same
-        /// <see cref="ApiLabel"/>, so each refreshes independently and correctly; handing over a
-        /// cached token would let a stale one overwrite a fresh one on the next adoption.
+        /// <b>Neither the token nor the token provider is part of a connection.</b> What this
+        /// copies has one lifetime — a build addresses one API for as long as it runs — and
+        /// <see cref="Tokens"/> has another: it is a framework system, re-created across a
+        /// scene load, so an adopting client sets that itself and keeps it current. Copying it
+        /// here would freeze whatever the donor happened to hold, which for every
+        /// <c>ScriptableObject</c> client today is <b>null</b>: those resolve a provider at call
+        /// time and never populate the property at all.
         /// </para>
         /// </remarks>
         /// <param name="config">The resolved configuration — base URL, credential, version.</param>
-        /// <param name="tokens">The provider both clients share.</param>
         /// <param name="apiLabel">The label the server reports for itself; the key tokens are held under.</param>
         /// <param name="serverTime">The measured offset between this device's clock and the server's.</param>
-        public void AdoptConnection(AppIdentification config,
-                                    ITokenProvider tokens,
-                                    string apiLabel,
-                                    TimeSpan serverTime)
+        public void AdoptConnection(AppIdentification config, string apiLabel, TimeSpan serverTime)
         {
             apiConfig = config ?? throw new ArgumentNullException(nameof(config));
-            Tokens = tokens;
             ApiLabel = apiLabel;
             serverTimeOffset = serverTime;
         }
