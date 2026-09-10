@@ -1,7 +1,7 @@
 {
   "name": "com.anotherealitysrl.virtuademy-sdk-interface",
   "displayName": "Virtuademy-SDK-Interface",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "unity": "2020.1",
   "description": "Platform-context contracts and the wire types they hand back: the one point where the creator graph and the external-app graph meet. No transport and no credentials.",
   "keywords": [
@@ -9,6 +9,7 @@
   ],
   "category": "Unity",
   "dependencies": {
+    "com.anotherealitysrl.spacs-utility": "1.0.0",
     "com.unity.nuget.newtonsoft-json": "3.2.1"
   }
 }
