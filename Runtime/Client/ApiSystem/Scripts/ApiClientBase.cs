@@ -18,17 +18,42 @@ namespace Virtuademy.SDK.Core.ApiSystem
         public ApiClientBase() => Label = GetType().Name;
 
         #region Inspector info
-        protected AppIdentification apiConfig;
+        private AppIdentification apiConfigStorage;
 
-        private bool checkIsAlive = true;
-        private bool getApiInfo = true;
+        /// <summary>The resolved configuration this client signs and addresses with.</summary>
+        /// <remarks>
+        /// A <b>virtual property</b>, and lower-case, because it replaced a protected field of
+        /// that name and every line of this class — and of the systems built on it — already
+        /// says <c>apiConfig</c>. Virtual so a host that keeps the configuration somewhere else
+        /// can hand this class a window onto it rather than a copy: the <c>ScriptableObject</c>
+        /// system serializes the value in its own asset, subclasses read and assign it directly,
+        /// and one of them does so <i>after</i> calling <c>Init</c>. A copy taken at any single
+        /// moment would miss that write and the client would go on addressing the API with a
+        /// configuration nobody could see was stale.
+        /// </remarks>
+        protected virtual AppIdentification apiConfig
+        {
+            get => apiConfigStorage;
+            set => apiConfigStorage = value;
+        }
 
-        private bool allowUntrustedServers;
+        /// <remarks>Protected, not private, so a host can pass its own serialized values in.</remarks>
+        protected bool checkIsAlive = true;
+        protected bool getApiInfo = true;
+
+        protected bool allowUntrustedServers;
         #endregion
 
         #region Private info
-        // Runtime state (not serialized, populated by the static API class)
-        protected TimeSpan serverTimeOffset;
+        private TimeSpan serverTimeOffsetStorage;
+
+        /// <summary>How far this device's clock sits from the server's, measured at Init.</summary>
+        /// <remarks>Virtual for the same reason as <see cref="apiConfig"/> — see there.</remarks>
+        protected virtual TimeSpan serverTimeOffset
+        {
+            get => serverTimeOffsetStorage;
+            set => serverTimeOffsetStorage = value;
+        }
         #endregion
 
         #region Properties
