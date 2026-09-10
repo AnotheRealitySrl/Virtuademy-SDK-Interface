@@ -1,5 +1,30 @@
 # Release notes
 
+## v0.2.0
+
+### Changed
+- **The wire DTOs live here now.** `Virtuademy.SDK.PlatformApi.Wire` — 65 files, zero references —
+  moved from the `virtuademy-sdk-platformapi` package into this one, unchanged: same assembly name,
+  same GUIDs, same bytes. The eight assemblies that reference it are untouched.
+
+  The reason is that this package **names six of those DTOs** in `IPlatformContext`, so anyone who
+  installs the contracts needs them by construction. They were in a package that also carries the
+  platform's HTTP client — 923 lines, 64 endpoints — which needs `Virtuademy.SDK.Core`. So the two
+  audiences the contracts exist for could not install them: an external app got 70 compile errors,
+  and a creator got the platform client shipped into their project to be able to name a `UserDTO`.
+  Measured by `Virtuademy-ExternalApp-Test`.
+
+  The assembly keeps the name `Virtuademy.SDK.PlatformApi.Wire` even though it no longer sits in
+  that package. An assembly name is a wire symbol — a built bundle records components by it — so
+  renaming it would invalidate every published world for a tidier label. Left as a naming debt.
+- `com.unity.nuget.newtonsoft-json` is now declared: 32 of the DTO files use it, and it travelled
+  with them.
+
+### Known
+- The package now carries **two** assemblies. `Virtuademy.SDK.Interface` still declares no
+  transport and no credentials; `noEngineReferences` stays `false`, because the DTOs carry
+  `[SerializeField]` and that is what makes the contracts' closure engine-bound.
+
 ## v0.1.0
 
 First release as a repository of its own. The package existed before this, embedded in

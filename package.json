@@ -1,11 +1,14 @@
 {
   "name": "com.anotherealitysrl.virtuademy-sdk-interface",
   "displayName": "Virtuademy-SDK-Interface",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "unity": "2020.1",
-  "description": "Platform-context contracts: the one point where the creator graph and the external-app graph meet. Interfaces and value types, no transport and no credentials. It does reference the wire DTO assembly, for the six DTOs the contracts hand back.",
+  "description": "Platform-context contracts and the wire types they hand back: the one point where the creator graph and the external-app graph meet. No transport and no credentials.",
   "keywords": [
     "unity"
   ],
-  "category": "Unity"
+  "category": "Unity",
+  "dependencies": {
+    "com.unity.nuget.newtonsoft-json": "3.2.1"
+  }
 }
