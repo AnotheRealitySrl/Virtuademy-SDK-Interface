@@ -38,16 +38,15 @@ namespace Virtuademy.SDK.Core.ApiSystem
         public TimeSpan ServerTimeOffset { get => serverTimeOffset; set => serverTimeOffset = value; }
 
         /// <summary>
-        /// Where this client gets its bearer tokens. Left null it falls back to resolving the
-        /// authentication system through the framework, which is what every caller relies on
-        /// today.
+        /// Where this client gets its bearer tokens. The owner sets it before <see cref="Init()"/>;
+        /// left null, <see cref="ValidateJwtToken"/> throws.
         /// </summary>
         /// <remarks>
-        /// Settable rather than constructor-injected because this type is still a
-        /// <c>ScriptableObject</c>, which has no usable constructor. That is the only reason —
-        /// the parameter it becomes is the point of the refactor, and this property exists so
-        /// the call site in <see cref="ValidateJwtToken"/> already reads the way it will read
-        /// afterwards.
+        /// Settable rather than constructor-injected so a host that cannot use a constructor —
+        /// the <c>ScriptableObject</c> this class was extracted from — can supply one the same
+        /// way. The framework fallback that used to stand behind it did not survive the
+        /// extraction: this assembly does not reference the system framework, so there is
+        /// nothing here to fall back to.
         /// </remarks>
         public ITokenProvider Tokens { get; set; }
 
@@ -382,6 +381,42 @@ namespace Virtuademy.SDK.Core.ApiSystem
         public void SetApiConfig(AppIdentification config)
         {
             apiConfig = config;
+        }
+
+        /// <summary>
+        /// Takes on a connection another client has already resolved for the <b>same</b> API
+        /// server, in place of running an <see cref="Init()"/> of this client's own.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Two clients against one server is the normal shape once endpoints are split by
+        /// audience rather than by host: the SDK client an application consumes and the client
+        /// that application keeps for its own calls address the same API. The second one has
+        /// nothing to discover — the base URL, the credential, the server-time offset and the
+        /// API label were all settled by the first — and initialising it properly would repeat
+        /// the <c>IsAlive</c> and <c>apiserver/info</c> round trips on every boot, and add a
+        /// second way to fail startup against a server already known to be reachable.
+        /// </para>
+        /// <para>
+        /// The bearer token is not among the values copied, on purpose. Both clients resolve
+        /// theirs through the same <see cref="ITokenProvider"/> under the same
+        /// <see cref="ApiLabel"/>, so each refreshes independently and correctly; handing over a
+        /// cached token would let a stale one overwrite a fresh one on the next adoption.
+        /// </para>
+        /// </remarks>
+        /// <param name="config">The resolved configuration — base URL, credential, version.</param>
+        /// <param name="tokens">The provider both clients share.</param>
+        /// <param name="apiLabel">The label the server reports for itself; the key tokens are held under.</param>
+        /// <param name="serverTime">The measured offset between this device's clock and the server's.</param>
+        public void AdoptConnection(AppIdentification config,
+                                    ITokenProvider tokens,
+                                    string apiLabel,
+                                    TimeSpan serverTime)
+        {
+            apiConfig = config ?? throw new ArgumentNullException(nameof(config));
+            Tokens = tokens;
+            ApiLabel = apiLabel;
+            serverTimeOffset = serverTime;
         }
     }
 }
