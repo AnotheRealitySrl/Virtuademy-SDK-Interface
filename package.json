@@ -3,7 +3,7 @@
   "displayName": "Virtuademy-SDK-Interface",
   "version": "0.1.0",
   "unity": "2020.1",
-  "description": "Platform-context contracts: the one point where the creator graph and the external-app graph meet. Interfaces and value types only — no transport, no credentials, no engine dependency.",
+  "description": "Platform-context contracts: the one point where the creator graph and the external-app graph meet. Interfaces and value types, no transport and no credentials. It does reference the wire DTO assembly, for the six DTOs the contracts hand back.",
   "keywords": [
     "unity"
   ],
