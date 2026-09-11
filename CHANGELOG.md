@@ -15,7 +15,7 @@
   planned. The rename was taken now, while it costs a republication that was going to happen anyway,
   rather than after it costs a migration. Creator projects carry across with the rename migrator in
   `Virtuademy-SDK-Environments`, which rewrites `$type` values in Visual Scripting graphs.
-- The `displayName` is now `Virtuademy SDK Core`.
+- The `displayName` is now `Virtuademy-SDK-Core`, hyphenated like every sibling package.
 
 ### Added
 - `TenantConfigurationClient` and the tenant wire DTOs: the Configuration API client, extracted from
