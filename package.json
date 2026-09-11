@@ -1,6 +1,6 @@
 {
-  "name": "com.anotherealitysrl.virtuademy-sdk-interface",
-  "displayName": "Virtuademy-SDK-Interface",
+  "name": "com.anotherealitysrl.virtuademy-sdk-core",
+  "displayName": "Virtuademy SDK Core",
   "version": "0.3.0",
   "unity": "2020.1",
   "description": "Platform-context contracts and the wire types they hand back: the one point where the creator graph and the external-app graph meet. No transport and no credentials.",

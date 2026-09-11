@@ -2,7 +2,7 @@ using System;
 
 using UnityEngine;
 
-namespace Virtuademy.SDK.PlatformApi
+namespace Virtuademy.SDK.ApiData
 {
     /// <summary>
     /// One published <c>ExternalApp</c> experience of the calling app, plus the world it lives in.

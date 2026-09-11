@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 using UnityEngine;
 
-namespace Virtuademy.SDK.PlatformApi
+namespace Virtuademy.SDK.ApiData
 {
     /// <summary>
     /// Runtime NPC (chatbot appearance) returned by the Application API

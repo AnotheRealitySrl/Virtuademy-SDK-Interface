@@ -1,4 +1,4 @@
-# Virtuademy-SDK-Interface
+# Virtuademy-SDK-Core
 
 The platform-context contracts. This is the one point where the creator graph and the external-app
 graph meet: a creator installs `SPACS-*` + this + `Environments`, an external app developer installs
@@ -6,7 +6,7 @@ graph meet: a creator installs `SPACS-*` + this + `Environments`, an external ap
 
 ## What is here today
 
-One assembly, `Virtuademy.SDK.Interface`:
+One assembly, `Virtuademy.SDK.Core` (the namespace inside it is still `Virtuademy.SDK.Interface`):
 
 | Type | Role |
 |---|---|
@@ -27,9 +27,9 @@ the perimeter: naming `SessionDTO` would make this assembly reference the one ho
 client, and a creator installing these contracts would get the client along with them.
 
 That argument held only because the DTOs and the client shared an assembly, which was an accident of
-layout rather than a necessity. **They no longer do.** The DTOs are `Virtuademy.SDK.PlatformApi.Wire`
+layout rather than a necessity. **They no longer do.** The DTOs are `Virtuademy.SDK.ApiData.Wire`
 — data and nothing else — while the transport, the credential and the sixty endpoints stay in
-`Virtuademy.SDK.PlatformApi`, which nothing here names. The perimeter the plan calls invariant 4a,
+`Virtuademy.SDK.ApiData`, which nothing here names. The perimeter the plan calls invariant 4a,
 *no transport and no credential in the contracts*, holds with no mirrored type at all.
 
 The mirror's cost was paid before it came out: four members had to be dropped for having no wire

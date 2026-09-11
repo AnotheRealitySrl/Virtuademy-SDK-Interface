@@ -2,7 +2,7 @@
 
 using UnityEngine;
 
-namespace Virtuademy.SDK.PlatformApi
+namespace Virtuademy.SDK.ApiData
 {
     [Serializable]
     public class ScheduleDTO

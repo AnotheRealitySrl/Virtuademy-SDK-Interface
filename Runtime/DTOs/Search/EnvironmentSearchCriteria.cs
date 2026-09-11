@@ -1,7 +1,7 @@
 using UnityEngine;
 
 #nullable enable
-namespace Virtuademy.SDK.PlatformApi
+namespace Virtuademy.SDK.ApiData
 {
     public class EnvironmentSearchCriteria
     {

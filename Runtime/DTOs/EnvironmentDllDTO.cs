@@ -2,7 +2,7 @@ using System;
 
 using UnityEngine;
 
-namespace Virtuademy.SDK.PlatformApi
+namespace Virtuademy.SDK.ApiData
 {
     /// <summary>
     /// The interpreted (HybridCLR) assembly an environment needs. Null when the world

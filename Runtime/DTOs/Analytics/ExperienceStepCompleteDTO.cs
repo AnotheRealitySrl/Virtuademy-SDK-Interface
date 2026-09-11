@@ -1,6 +1,6 @@
 using System;
 
-namespace Virtuademy.SDK.PlatformApi
+namespace Virtuademy.SDK.ApiData
 {
     [Serializable]
     public class ExperienceStepCompleteDTO : ExperienceStepDTO

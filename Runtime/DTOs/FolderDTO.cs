@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Virtuademy.SDK.PlatformApi
+namespace Virtuademy.SDK.ApiData
 {
     [Serializable]
     [Newtonsoft.Json.JsonObject(Newtonsoft.Json.MemberSerialization.Fields)]
@@ -15,7 +15,7 @@ namespace Virtuademy.SDK.PlatformApi
         [SerializeField] private int level;
         [SerializeField] private int assetCount;
 
-        // Proprietà del Proprietario
+        // Propriet del Proprietario
         [SerializeField] private string ownerNickname;
         [SerializeField] private int ownerId;
 
@@ -35,7 +35,7 @@ namespace Virtuademy.SDK.PlatformApi
         [SerializeField] private List<FolderDTO> children;
 
 
-        // --- Proprietà Pubbliche ---
+        // --- Propriet Pubbliche ---
         public int Id => id;
         public string Name => name;
         public string Path => path;

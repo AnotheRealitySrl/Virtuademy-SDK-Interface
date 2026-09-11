@@ -3,7 +3,7 @@ using System;
 
 using UnityEngine;
 
-namespace Virtuademy.SDK.PlatformApi
+namespace Virtuademy.SDK.ApiData
 {
     [Serializable, JsonObject(MemberSerialization.Fields)]
     public class OnlineUserDTO

@@ -1,5 +1,34 @@
 # Release notes
 
+## v0.3.0
+
+### Changed
+- **Renamed.** The package id becomes `com.anotherealitysrl.virtuademy-sdk-core` and the assembly
+  `Virtuademy.SDK.Core`; the wire assembly becomes `Virtuademy.SDK.ApiData.Wire`. The name
+  `Virtuademy.SDK.Core` was in use by the framework package, which took `Virtuademy.SystemCore` in
+  the same wave — the two moves are one change and cannot be split, because for one commit the old
+  and the new name would collide.
+
+  The v0.2.0 note below argued the wire assembly should keep its name because a built bundle records
+  components by assembly name, so a rename invalidates published worlds. **That argument is spent,
+  not wrong:** no bundle built on these packages is published yet, and a republication is already
+  planned. The rename was taken now, while it costs a republication that was going to happen anyway,
+  rather than after it costs a migration. Creator projects carry across with the rename migrator in
+  `Virtuademy-SDK-Environments`, which rewrites `$type` values in Visual Scripting graphs.
+- The `displayName` is now `Virtuademy SDK Core`.
+
+### Added
+- `TenantConfigurationClient` and the tenant wire DTOs: the Configuration API client, extracted from
+  the application system that used to be it, so nothing in the creator graph needs a framework to
+  read a tenant configuration.
+- `ApiClientBase.AdoptConnection`, so a second client can reuse a connection another one resolved
+  rather than resolving its own.
+- The transport assembly `Virtuademy.SDK.Core.Client` (`…Interface.Client` before this rename).
+
+### Fixed
+- A token provider is no longer copied along with a connection: the two have different lifetimes,
+  and copying the provider meant adopting a null one.
+
 ## v0.2.0
 
 ### Changed

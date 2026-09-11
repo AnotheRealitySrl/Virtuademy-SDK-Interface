@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Virtuademy.SDK.PlatformApi
+namespace Virtuademy.SDK.ApiData
 {
     public class AnalyticDTO
     {

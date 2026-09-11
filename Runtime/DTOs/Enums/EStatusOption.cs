@@ -1,5 +1,5 @@
 
-namespace Virtuademy.SDK.PlatformApi
+namespace Virtuademy.SDK.ApiData
 {
     public enum EStatusOption
     {
